@@ -380,18 +380,6 @@ SWIFT_CLASS("_TtC14IPificationSDK6IPLogs")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
-SWIFT_CLASS("_TtC14IPificationSDK17IPificationLocale")
-@interface IPificationLocale : NSObject
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-SWIFT_CLASS("_TtC14IPificationSDK16IPificationTheme")
-@interface IPificationTheme : NSObject
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
 #endif // defined(__OBJC__)
 #if __has_attribute(external_source_symbol)
 # pragma clang attribute pop
@@ -780,18 +768,6 @@ SWIFT_CLASS("_TtC14IPificationSDK15IPConfiguration")
 SWIFT_CLASS("_TtC14IPificationSDK6IPLogs")
 @interface IPLogs : NSObject
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@end
-
-SWIFT_CLASS("_TtC14IPificationSDK17IPificationLocale")
-@interface IPificationLocale : NSObject
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-SWIFT_CLASS("_TtC14IPificationSDK16IPificationTheme")
-@interface IPificationTheme : NSObject
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 #endif // defined(__OBJC__)
