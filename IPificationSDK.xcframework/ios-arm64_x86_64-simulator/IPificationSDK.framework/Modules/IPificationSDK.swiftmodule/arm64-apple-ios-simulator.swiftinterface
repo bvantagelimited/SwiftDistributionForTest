@@ -1,6 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.3.2 (swiftlang-1200.0.45 clang-1200.0.32.28)
-// swift-module-flags: -target arm64-apple-ios10.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name IPificationSDK
+// swift-compiler-version: Apple Swift version 6.3.1 effective-5.10 (swiftlang-6.3.1.1.2 clang-2100.0.123.102)
+// swift-module-flags: -target arm64-apple-ios12.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -Osize -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name IPificationSDK
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.1
 import CoreTelephony
 import Foundation
 @_exported import IPificationSDK
@@ -8,6 +9,9 @@ import Network
 import NetworkExtension
 import Swift
 import UIKit
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
 @_hasMissingDesignatedInitializers public class ConnectionManager {
   public static func checkNetworkInterfaces() -> (Swift.Bool, Swift.Bool, Swift.String?, Swift.String?, Swift.String?, Swift.String?)
   public static func checkOnly3G() -> (Swift.Bool, Swift.Bool, Swift.String?, Swift.String?)
@@ -30,9 +34,9 @@ public protocol RequestProtocol : AnyObject {
 }
 public class CoverageService {
   public var debug: Swift.Bool
-  public var callbackSuccess: ((IPificationSDK.CoverageResponse) -> Swift.Void)?
-  public var callbackFailed: ((IPificationSDK.IPificationException) -> Swift.Void)?
-  public var callbackLog: ((Swift.String) -> Swift.Void)?
+  public var callbackSuccess: ((_ response: IPificationSDK.CoverageResponse) -> Swift.Void)?
+  public var callbackFailed: ((_ error: IPificationSDK.IPificationException) -> Swift.Void)?
+  public var callbackLog: ((_ response: Swift.String) -> Swift.Void)?
   public init()
   @available(*, deprecated, message: "Use `startCheckCoverage` instead.")
   public func checkCoverage(_ customCoverageRequest: IPificationSDK.CoverageRequest? = nil)
@@ -46,10 +50,10 @@ public enum AuthChannel {
   case IP
   case SMS
   public static func == (a: IPificationSDK.AuthChannel, b: IPificationSDK.AuthChannel) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
   public var hashValue: Swift.Int {
     get
   }
-  public func hash(into hasher: inout Swift.Hasher)
 }
 public protocol SMSCallback : AnyObject {
   func onAuthInitiated(response: IPificationSDK.SMSAuthResponse)
@@ -96,8 +100,8 @@ public struct SMSErrorCode {
   public static let unknownError: Swift.Int
 }
 @_hasMissingDesignatedInitializers public class SMSServices {
-  public static func startVerification(phoneNumber: Swift.String, scope: Swift.String = "openid ip:phone_verify", callback: IPificationSDK.SMSCallback)
-  public static func verifyOTP(otpCode: Swift.String, authReqId: Swift.String, nonce: Swift.String, callback: IPificationSDK.SMSCallback)
+  public static func startVerification(phoneNumber: Swift.String, scope: Swift.String = "openid ip:phone_verify", callback: any IPificationSDK.SMSCallback)
+  public static func verifyOTP(otpCode: Swift.String, authReqId: Swift.String, nonce: Swift.String, callback: any IPificationSDK.SMSCallback)
   public static func reset()
   public static func isConfigured() -> Swift.Bool
   @objc deinit
@@ -109,24 +113,6 @@ public struct SMSErrorCode {
   public func getPlainResponse() -> Swift.String
   public func getCode() -> Swift.String?
   public func getState() -> Swift.String?
-  @objc deinit
-}
-public struct IsoCountryInfo {
-  public let name: Swift.String
-  public let numeric: Swift.String
-  public let alpha2: Swift.String
-  public let alpha3: Swift.String
-  public let calling: Swift.String
-  public let currency: Swift.String
-  public let continent: Swift.String
-  public var flag: Swift.String? {
-    get
-  }
-  public var fractionDigits: Swift.Int
-}
-@_hasMissingDesignatedInitializers public class IsoCountries {
-  public class func flag(countryCode: Swift.String) -> Swift.String?
-  public static let allCountries: [IPificationSDK.IsoCountryInfo]
   @objc deinit
 }
 @_hasMissingDesignatedInitializers public class AuthorizationResponse : IPificationSDK.ResponseProtocol {
@@ -141,9 +127,9 @@ public struct IsoCountryInfo {
 }
 public class AuthorizationService {
   public var debug: Swift.Bool
-  public var callbackSuccess: ((IPificationSDK.AuthorizationResponse) -> Swift.Void)?
-  public var callbackFailed: ((IPificationSDK.IPificationException) -> Swift.Void)?
-  public var callbackLog: ((Swift.String) -> Swift.Void)?
+  public var callbackSuccess: ((_ response: IPificationSDK.AuthorizationResponse) -> Swift.Void)?
+  public var callbackFailed: ((_ response: IPificationSDK.IPificationException) -> Swift.Void)?
+  public var callbackLog: ((_ response: Swift.String) -> Swift.Void)?
   public init()
   @available(*, deprecated, message: "Use `startAuthentication` instead.")
   public func startAuthorization(_ authRequest: IPificationSDK.AuthorizationRequest? = nil)
@@ -151,35 +137,27 @@ public class AuthorizationService {
   public func startAuthorization(viewController: UIKit.UIViewController, _ authRequest: IPificationSDK.AuthorizationRequest? = nil)
   public func startAuthentication(_ authRequest: IPificationSDK.AuthorizationRequest? = nil)
   public func startAuthentication(viewController: UIKit.UIViewController, _ authRequest: IPificationSDK.AuthorizationRequest? = nil)
-  public func startAuthentication(_ authRequest: IPificationSDK.AuthorizationRequest? = nil, callback: IPificationSDK.MultiAuthCallback)
-  public func startAuthentication(viewController: UIKit.UIViewController, _ authRequest: IPificationSDK.AuthorizationRequest? = nil, callback: IPificationSDK.MultiAuthCallback)
-  public func startSMSAuthentication(phoneNumber: Swift.String, scope: Swift.String = "openid ip:phone_verify", callback: IPificationSDK.SMSCallback)
-  public func verifySMSOTP(otpCode: Swift.String, authReqId: Swift.String, nonce: Swift.String, callback: IPificationSDK.SMSCallback)
+  public func startAuthentication(_ authRequest: IPificationSDK.AuthorizationRequest? = nil, callback: any IPificationSDK.MultiAuthCallback)
+  public func startAuthentication(viewController: UIKit.UIViewController, _ authRequest: IPificationSDK.AuthorizationRequest? = nil, callback: any IPificationSDK.MultiAuthCallback)
+  public func startSMSAuthentication(phoneNumber: Swift.String, scope: Swift.String = "openid ip:phone_verify", callback: any IPificationSDK.SMSCallback)
+  public func verifySMSOTP(otpCode: Swift.String, authReqId: Swift.String, nonce: Swift.String, callback: any IPificationSDK.SMSCallback)
   public func startIMAuthorization(viewController: UIKit.UIViewController, _ authRequest: IPificationSDK.AuthorizationRequest? = nil)
   public func checkIPAddress()
   public func checkRequestedIP(url: Swift.String)
   @objc deinit
 }
-@_hasMissingDesignatedInitializers public class IsoCountryCodes {
-  public class func find(key: Swift.String) -> IPificationSDK.IsoCountryInfo?
-  public class func searchByName(_ name: Swift.String) -> IPificationSDK.IsoCountryInfo?
-  public class func searchByNumeric(_ numeric: Swift.String) -> IPificationSDK.IsoCountryInfo?
-  public class func searchByCurrency(_ currency: Swift.String) -> [IPificationSDK.IsoCountryInfo]
-  public class func searchByCallingCode(_ calllingCode: Swift.String) -> [IPificationSDK.IsoCountryInfo]
-  @objc deinit
-}
-extension UIDevice {
-  public static let deviceModelName: Swift.String
+extension UIKit.UIDevice {
+  @_Concurrency.MainActor @preconcurrency public static let deviceModelName: Swift.String
 }
 public enum ResponseType {
   case json
   case xml
   case string
   public static func == (a: IPificationSDK.ResponseType, b: IPificationSDK.ResponseType) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
   public var hashValue: Swift.Int {
     get
   }
-  public func hash(into hasher: inout Swift.Hasher)
 }
 @_hasMissingDesignatedInitializers public class IPificationResponse {
   public var responseType: IPificationSDK.ResponseType
@@ -209,10 +187,10 @@ public enum IPEnvironment {
   case SANDBOX
   case PRODUCTION
   public static func == (a: IPificationSDK.IPEnvironment, b: IPificationSDK.IPEnvironment) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
   public var hashValue: Swift.Int {
     get
   }
-  public func hash(into hasher: inout Swift.Hasher)
 }
 @objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class IPConfiguration : ObjectiveC.NSObject {
   final public let CURRENT_VERSION: Swift.String
@@ -350,10 +328,10 @@ public enum IPificationError {
     get
   }
   public static func == (a: IPificationSDK.IPificationError, b: IPificationSDK.IPificationError) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
   public var hashValue: Swift.Int {
     get
   }
-  public func hash(into hasher: inout Swift.Hasher)
 }
 public struct IPificationException : Swift.Error {
   public let rawResponse: Swift.String?
